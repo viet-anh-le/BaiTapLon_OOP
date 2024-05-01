@@ -28,6 +28,60 @@ float Utility::randomFloat(float lowerBound, float upperBound)
     return dis(gen);
 }
 
+//read hospital data file
+std::map<std::string, std::vector<float>> Utility::readHospitalData(const char *fileName)
+{
+    map<std::string, std::vector<float>> map;
+    ifstream input(fileName);
+
+    std::string delimiter = " ";
+
+    int lineNo = 1;
+    int n;
+
+    for (std::string line; getline(input, line);){
+        vector<float> v;
+        if (lineNo == 1){
+            n = stoi(line);
+            v.push_back(n);
+            map["numWard"] = v;
+        }
+        else
+        {
+            size_t pos = 0;
+            std::string token;
+            std::string WardId;
+            while ((pos = line.find(delimiter)) != std::string::npos)
+            {
+                token = line.substr(0, pos);
+                v.push_back(stof(token));
+                line.erase(0, pos + delimiter.length());
+            }
+            if (lineNo >= 2 && lineNo <= n + 1){
+                WardId = line;
+            }
+            else if(lineNo == n + 2){
+                WardId = "A";
+                v.push_back(stof(line));
+            }
+            else if (lineNo == n + 3){
+                WardId = "AGV_Start";
+                v.push_back(stof(line));
+            }
+            else if (lineNo == n + 4){
+                WardId = "AGV_End";
+                v.push_back(stof(line));
+            }
+            else if (lineNo == n + 5){
+                WardId = "Bound";
+                v.push_back(stof(line));
+            }
+            map[WardId] = v;
+        }
+        lineNo++;
+    }
+};
+
 // read map data file
 std::map<std::string, std::vector<float>> Utility::readMapData(
     const char *fileName)

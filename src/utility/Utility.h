@@ -18,6 +18,8 @@ namespace Utility
 
     std::map<std::string, std::vector<float>> readMapData(const char *fileName);
 
+    std::map<std::string, std::vector<float>> readHospitalData(const char *fileName);
+
     std::vector<json> convertMapData(std::map<std::string, std::vector<float>> mapData);
 
     bool hallwaySameCharExists(float hallwayLength, std::vector<json> data);
