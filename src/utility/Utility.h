@@ -69,6 +69,8 @@ namespace Utility
     int getNumAGVCompleted(std::vector<AGV *> agvs);
 
     int randomInt(int from, int to);
+
+    std::vector < int<int> > getImpact(int numOfSample,int numOfValues,float min_value,float max_value);
 };
 
 #endif

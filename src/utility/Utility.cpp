@@ -12,6 +12,8 @@
 #include <random>
 #include <string>
 #include <vector>
+#include<algorithm>
+#include<cmath>
 
 #include "src/constant/Constant.h"
 
@@ -1532,4 +1534,24 @@ int Utility::randomInt(int from, int to)
     std::mt19937 gen(rd()); // seed the generator
     std::uniform_int_distribution<> distr(from, to);
     return distr(gen);
+}
+
+std::vector< double<double> > Ultility::getImpact(int numOfSample,int numOfValues,double min_value,double max_value)
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::normal_distribution<> dist((min_value + max_value) / 2, (max_value - ((min_value + max_value) / 2)) / 3);
+
+    std::vector< double<double> > imPact;
+    imPact.resize(6);
+    for(int i=0;i<numOfSample;i++)
+    {
+        for(int i = 0;i<6;i++)
+        {
+            double num = dist(gen);
+            num = std::round(num * 100) / 100;
+            imPact[i].push_back(num);
+        }
+    }
+    return imPact;
 }
