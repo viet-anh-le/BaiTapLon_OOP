@@ -70,7 +70,7 @@ namespace Utility
 
     int randomInt(int from, int to);
 
-    std::vector < int<int> > getImpact(int numOfSample,int numOfValues,float min_value,float max_value);
+    std::vector < double<double> > getImpact(int numOfSample,int numOfValues,double min_value,double max_value);
 };
 
 #endif
