@@ -37,6 +37,11 @@ protected:
     Point exit;
     //Toa do cac buc tuong vien quanh
     vector <pair<Point,Point>> wallEdge;
+public:
+    string getWardID()
+    {
+        return this->WardID;
+    }
 };
 
 class Personality{
@@ -65,7 +70,8 @@ protected:
 };
 
 class AGVEvent : public Event{
-
+protected:
+    double impactofAGV[6][1];
 };
 
 enum Walkability{
@@ -92,6 +98,14 @@ protected:
     double age;
     AGVEvent impactOfAGV;
     Point tempPoints;
+public:
+    double getAge(){
+        return this->age;
+    }
+    string getStart()
+    {
+        return (this->start).getWardID();
+    }
 };
 
 class Patient : public Pedestrian{
