@@ -1,7 +1,7 @@
 {
   "runMode": {
-    "description": "Run mode (1 - Statistical calculation, 0 - Test)",
-    "value": 1
+    "description": "Run mode (1 - Statistical calculation, 0 - Test, 3 - Accept hospital.txt)",
+    "value": 0
   },
 
   "noRunPerHallway": {
@@ -204,22 +204,22 @@
     "distribution": {
       "open": {
         "description": "open personalities are more optimistic when facing setbacks and will be more active in solving difficulties",
-        "positiveEmotionThreshold": "0.3",
-        "negativeEmotionThreshold": "-0.7",
+        "positiveEmotionThreshold": 0.3,
+        "negativeEmotionThreshold": 0.7,
         "percentage": 50,
         "lambda": 1
       },
       "neurotic": {
         "description": "neurotic personalities tend to behave negatively in the face of the same frustration.",
-        "positiveEmotionThreshold": "0.6",
-        "negativeEmotionThreshold": "-0.4",
+        "positiveEmotionThreshold": 0.6,
+        "negativeEmotionThreshold": -0.4,
         "percentage": 50,
         "lambda": 4
       }
     },
     "heuristic": {
-      "positiveEmotionThreshold": "0.8",
-      "negativeEmotionThreshold": "-0.8"
+      "positiveEmotionThreshold": 0.8,
+      "negativeEmotionThreshold": -0.8
     }
   },
 
@@ -298,7 +298,57 @@
         "sumOfValues": "numOfAgents",
         "lowerBound": "0",
         "upperBound": "10000"
+      },
+      "impactOfAGV" : {
+        "description" : "distribution of AGV’s impact for all pedestrians",
+        "scope" : 3,
+        "distribution": {
+          "children" : {
+            "description" : "normal distribution",
+            "numberOfValues" : 100,
+            "minValue" : 0.01,
+            "maxValue" : 0.99,
+            "numberOfFields" : 6
+      },
+          "ALKW" : {
+            "description" : "normal distribution",
+            "numberOfValues" : 100,
+            "minValue" : -0.29,
+            "maxValue" : 0.99,
+            "numberOfFields" : 6
+      },
+      "BFGMEN" : {
+            "description" : "normal distribution",
+            "numberOfValues" : 100,
+            "minValue" : -0.99,
+            "maxValue" : 0.29,
+            "numberOfFields" : 6
+      },
+          "Elder" : {
+            "description" : "normal distribution",
+            "numberOfValues" : 100,
+            "minValue" : -0.99,
+            "maxValue" : 0.29,
+            "numberOfFields" : 6
+      },
+      "Blinder" : {
+            "description" : "normal distribution",
+            "numberOfValues" : 100,
+            "minValue" : -0.99,
+            "maxValue" : 0.29,
+            "numberOfFields" : 6
+      },
+          "Other" : {
+            "description" : "normal distribution",
+            "numberOfValues" : 100,
+            "minValue" : -0.99,
+            "maxValue" : 0.99,
+            "numberOfFields" : 6
       }
+      
+      }
+      }
+      
     }
   }
 }
