@@ -70,6 +70,7 @@ vector<double> generateAges(){
     while(getline(file, line)){
         stringstream ss(line);
         double value;
+        if (ss >> value)
         allAges.push_back(value);
     }
     file.close();
