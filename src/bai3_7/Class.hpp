@@ -1,10 +1,135 @@
 #ifndef Class
 #define Class
 
+#include <iostream>
 #include <vector>
 #include <string>
+#include <random>
+#include <ctime>
+#include "../../lib/nlohmann/json.hpp"
+#include <fstream>
+#include <set>
 
 using namespace std;
+
+using json = nlohmann::json;
+string filename = "../../data/input.json";
+
+json readjsondata(const char *fileName){
+    std::ifstream f(fileName);
+    json data = json::parse(f);
+    return data;
+}
+
+string fname = "../../data/hospital.txt";
+vector <pair<string, vector<float>>> readhospital(const string& fname){
+    vector <pair<string, vector<float>>> hospital;
+    hospital.clear();
+    ifstream input(fname);
+    if (!input.is_open()){
+        cout << "Mo file khong thanh cong" << endl;
+        return hospital;
+    }
+    string line;
+    int n;
+    input >> n;
+    getline(input, line);
+    for (int i = 0; i < n; i++){
+        string line;
+        getline(input, line);
+        istringstream iss(line);
+
+        vector <float> value(5);
+        string wardID;
+        iss >> value[0] >> value[1] >> value[2] >> value[3] >> value[4] >> wardID;
+        
+        hospital.push_back({wardID, value});
+    }
+
+    //Đọc thông tin khoa A
+    vector <float> value(8);
+    for (int i = 0; i < 8; i++){
+        input >> value[i];
+    }
+    hospital.push_back({"A", value});
+    return hospital;
+}
+
+vector<string> ward_options(){
+    vector <string> ward_options;
+    ward_options.clear();
+    vector <pair<string, vector<float>>> hospital = readhospital(fname);
+    for (int i = 0; i < (int)hospital.size(); i++){
+        ward_options.push_back(hospital[i].first);
+    }
+    return ward_options;
+}
+
+// Hàm gen ngẫu nhiên 2 giá trị 0 và 1 với xác suất 0.5 và sai số dưới 5%
+int generateRandomNumber() {
+    // Thiết lập random device và engine
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    // Tạo ra phân phối Bernoulli với xác suất p = 0.5
+    std::bernoulli_distribution distrib(0.5);
+
+    // Biến để đếm số lần xuất hiện của mỗi giá trị
+    int count0 = 0;
+    int count1 = 0;
+
+    // Số lần thử
+    int numTrials = 100000; // Số lần thử có thể điều chỉnh
+
+    // Thực hiện thử nghiệm và đếm số lần xuất hiện của mỗi giá trị
+    for (int i = 0; i < numTrials; ++i) {
+        if (distrib(gen)) {
+            count1++;
+        } else {
+            count0++;
+        }
+    }
+
+    // Tính tỷ lệ thực tế của mỗi giá trị
+    double ratio0 = static_cast<double>(count0) / numTrials;
+    double ratio1 = static_cast<double>(count1) / numTrials;
+
+    // Đảm bảo tỷ lệ thực tế không vượt quá 5% sai số so với 0.5
+    while (std::abs(ratio0 - 0.5) > 0.05 || std::abs(ratio1 - 0.5) > 0.05) {
+        // Đếm lại với số lần thử lớn hơn
+        numTrials += 1000;
+        count0 = 0;
+        count1 = 0;
+
+        for (int i = 0; i < numTrials; ++i) {
+            if (distrib(gen)) {
+                count1++;
+            } else {
+                count0++;
+            }
+        }
+
+        // Tính lại tỷ lệ thực tế
+        ratio0 = static_cast<double>(count0) / numTrials;
+        ratio1 = static_cast<double>(count1) / numTrials;
+    }
+
+    // Trả về một giá trị ngẫu nhiên
+    return distrib(gen);
+}
+
+int randomNumber(int min_value, int max_value){
+    // Khởi tạo một generator ngẫu nhiên
+    std::random_device rd;  // Thiết bị ngẫu nhiên
+    std::mt19937 gen(rd()); // Mersenne Twister engine, seed từ random_device
+
+    // Tạo một phân phối ngẫu nhiên từ 0 đến 42 (bao gồm cả 0 và 42)
+    std::uniform_int_distribution<> dis(min_value, max_value);
+
+    // Tạo số nguyên ngẫu nhiên và in ra
+    int randomNumber = dis(gen);
+    return randomNumber;
+}
 
 class Point{
 private:
@@ -185,6 +310,8 @@ protected:
     double age;
     AGVEvent impactOfAGV;
     Point tempPoints;
+    int numOfWard;
+    string type;
 public:
     Pedestrian(int ID,Ward start,Ward end,vector<Ward> journey,double velocity,Personality personality,Emotion emotion,
         vector<Event> events,double walkingTime,int values,double distance,double age,AGVEvent impactOfAGV,Point tempPoints)
@@ -207,11 +334,50 @@ public:
         }
         Pedestrian(){}
 
+        //Hàm random đường đi: giá trị các khoa từ 1 đến 10, các khoa không trùng nhau.
+        int convertToRange(double value) {
+        int result = static_cast<int>(value);
+        if (result < 1) result = 1;
+        if (result > 10) result = 10;
+        return result;
+        }
+        virtual Walkability getWalkability(){};
+        string getType(){return this->type;}
         int getValues(){return this->values;}
         int getID() { return this->ID; }
         Ward getStart() { return this->start; }
         Ward getEnd() { return this->end; }
-        vector<Ward> getJourney() { return this->journey; }
+        vector<string> getJourney() { 
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::normal_distribution<> distrib(5.5, 2.5); // Mean 5.5, Standard deviation 2.5
+
+            vector <pair<string, vector<float>>> hospital = readhospital(fname);
+            vector <string> ans;
+            ans.clear();
+            ans.push_back(start.getID());
+            std::set<int> uniqueValues;
+            for (int i = 0; i < (int)hospital.size(); i++){
+                if (hospital[i].first == start.getID()){
+                    uniqueValues.insert(i + 1);
+                    break;
+                }
+            }
+            while (uniqueValues.size() < numOfWard) {
+                double randomValue = distrib(gen);
+                int value = convertToRange(randomValue);
+                set <int> :: iterator it = uniqueValues.find(value);
+                if (it == uniqueValues.end()){
+                    pair<string, vector<float>> ward = hospital[value - 1];
+                    ans.push_back(ward.first);
+                    uniqueValues.insert(value);
+                }
+                // Ward department;
+                // department.setID(ward.first);
+            }
+            ans.push_back(end.getID());
+            return ans;
+        }
         double getVelocity() { return this->velocity; }
         Personality getPersonality() { return this->personality; }
         Emotion getEmotion() { return this->emotion; }
@@ -227,16 +393,19 @@ public:
         double getWalkingTime() { return this->walkingTime; }
         double getDistance() { return this->distance; }
         double getAge() { return this->age; }
-        AGVEvent getImpactOfAGV() { return this->impactOfAGV; }
         Point getTempPoints() { return this->tempPoints; }
-
+        
+        vector<double> getImpactOfAGV(){
+            return this->impactOfAGV.getIntensity();
+        }
+        void setType(string type){this->type = type;}
         void setValues(int values){this->values = values;}
         void setID(int ID) { this->ID = ID; }
         void setStart(Ward start) { this->start = start; }
         void setEnd(Ward end) { this->end = end; }
         void setJourney(vector<Ward>& journey) { this->journey = journey; }
         void setVelocity(double velocity) { this->velocity = velocity; }
-        void setPersonality(Personality Personality) { this->personality = personality; }
+        void setPersonality(Personality personality) { this->personality = personality; }
         void setEmotion(Emotion emotion) { this->emotion = emotion; }
         void setEvents(vector<Event>& events) { this->events = events; }
         void setWalkingTime(double walkingTime) { this->walkingTime = walkingTime; }
@@ -244,13 +413,26 @@ public:
         void setAge(double age) { this->age = age; }
         void setImpactOfAGV(AGVEvent impactOfAGV) { this->impactOfAGV = impactOfAGV; }
         void setTempPoints(Point temPoints) { this->tempPoints = tempPoints; }
+        void setNumOfWard(int numOfWard){
+            this->numOfWard = numOfWard;
+        }
 };
 
 class Patient : public Pedestrian{
 private:
     enum Walkability walkability;
 public:
-    Walkability getWalkability(){return this->walkability;}
+    Walkability getWalkability(){
+    // Thiết lập random device và engine
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    // Tạo ra phân phối với các giá trị từ 0 đến 5
+    std::uniform_int_distribution<> distrib(0, 5);
+
+    // Trả về giá trị ngẫu nhiên thuộc enum Walkability
+    return static_cast<Walkability>(distrib(gen));
+    }
     void setWalkability(Walkability walkability){this->walkability = walkability;}
     Patient(){}
 };
@@ -259,12 +441,40 @@ class Visitor : public Pedestrian{
 private:
     enum Walkability walkability;
 public:
-    Walkability getWalkability(){return this->walkability;}
+    Walkability getWalkability(){
+    // Thiết lập random device và engine
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    // Tạo ra phân phối với các giá trị từ 0 đến 5
+    std::uniform_int_distribution<> distrib(0, 5);
+
+    // Trả về giá trị ngẫu nhiên thuộc enum Walkability
+    return static_cast<Walkability>(distrib(gen));
+    }
     void setWalkability(Walkability walkability){this->walkability = walkability;}
     Visitor(){}
 };
 
 class Personel : public Pedestrian{
+private:
+    enum Walkability walkability;
+public:
+    Walkability getWalkability(){
+    // Thiết lập random device và engine
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    // Tạo ra phân phối với các giá trị từ 0 đến 1
+    std::uniform_int_distribution<> distrib(0, 1);
+
+    // Trả về giá trị ngẫu nhiên thuộc enum Walkability
+    return static_cast<Walkability>(distrib(gen));
+    }
+
+    void setWalkability(Walkability walkability){this->walkability = walkability;}
+    Personel(){}
+
     
 };
 
