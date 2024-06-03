@@ -3,6 +3,7 @@
 using namespace std;
 
 Pedestrian p;
+default_random_engine generator;
 
 void processEmotions(Pedestrian p, int H) {
 	int lambda = p.personality.getLambda();
